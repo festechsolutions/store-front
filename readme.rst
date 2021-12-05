@@ -10,6 +10,7 @@ Running the Application
 Accessing Store Front
 ---------------------------------
 URL: http://localhost/store-front/home/identify/<table-name>
+
 Example:- http://localhost/store-front/home/identify/1
 
 Accessing Admin Panel
@@ -17,5 +18,7 @@ Accessing Admin Panel
 URL: http://localhost/store-front/restaurant
 
 Default Credentials
+
 Email: 		admin@admin.com
+
 Password: 	password
