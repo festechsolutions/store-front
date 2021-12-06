@@ -290,6 +290,22 @@ CREATE TABLE `register` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `cart`
+--
+
+CREATE TABLE `cart` (
+  `id` int(11) NOT NULL,
+  `cust_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `qty` varchar(255) NOT NULL,
+  `rate` varchar(255) NOT NULL,
+  `amount` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `stores`
 --
 
@@ -422,6 +438,12 @@ ALTER TABLE `register`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `cart`
+--
+ALTER TABLE `cart`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `stores`
 --
 ALTER TABLE `stores`
@@ -489,6 +511,12 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT for table `register`
 --
 ALTER TABLE `register`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `cart`
+--
+ALTER TABLE `cart`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --

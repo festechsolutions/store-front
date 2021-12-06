@@ -47,7 +47,7 @@
           <h5 class="display-4">Today's Menu</h5>
           <div class="row justify-content-center">
            <div class="col-md-7">
-             <p class="lead">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+             <p class="lead">Cheese is the most stolen food in the world</p>
            </div>
           </div>
         </div>
@@ -55,53 +55,56 @@
     </div>
 
 	  <!-- SECTIONS -->
-    <?php foreach ($categories as $key => $value): ?>
-	  <section id="section-<?php echo $value['name'];?>">
-	    <div class="container">
-        <div class="col-md-10 text-center">
-	        <div class="text-center">
-	         <h4>------- <?php echo "<p style='color:#f4511e;'>".$value['name']."</p>";?>--------</h4>
-	      </div>
+    <form method="post" onsubmit="return false" id="addtoCart">
+      <?php foreach ($categories as $key => $value): ?>
+  	  <section id="section-<?php echo $value['name'];?>">
+  	    <div class="container">
+          <div class="col-md-10 text-center">
+  	        <div class="text-center">
+  	         <h4>------- <?php echo "<p style='color:#f4511e;'>".$value['name']."</p>";?>--------</h4>
+  	      </div>
 
-        <?php foreach ($products as $k => $v):
+          <?php foreach ($products as $k => $v):
 
-         /*$string = $products[$k]["category_id"];
-         $string = substr($string,2);
-         $string = substr($string, 0, -2);*/
+           /*$string = $products[$k]["category_id"];
+           $string = substr($string,2);
+           $string = substr($string, 0, -2);*/
 
-         if($value['name'] == $products[$k]["category_name"]){ ?>
+           if($value['name'] == $products[$k]["category_name"]){ ?>
 
-          <form method="post" action="">
-           <div class="tab-content">
-            <div class="row">
-              <div class="col-md-12 ftco-animate">
-                <div class="media menu-item">
-                  <div class="media-body">
-                   <table style="width:100%;"><tr>
-                    <th style="width:70%;text-align:left"><h5 class="mt-0"> <?php echo $products[$k]["name"]; ?></h5></th>
-                      
-                      <td style="width:30%;text-align:right">
-                       <div class="quantity">
-                        <button class="minus-btn" type="button" name="button">-</button>
-                        <input type="text" name="quantity" value="0">
-                        <button class="plus-btn" type="button" name="button">+</button>
-                       </div>
-                      </td></tr>
-                     <tr><th style="text-align:left"><h6 class="text-primary menu-price"><?php echo "&#8377;".$products[$k]["price"]; ?></h6></th>
-  				           <td style="text-align:right"><input type="submit" class="btn btn-success" value="Add" /></td></tr>
-                   </table>
+             <div class="tab-content">
+              <div class="row">
+                <div class="col-md-12 ftco-animate">
+                  <div class="media menu-item">
+                    <div class="media-body">
+                     <table id="menuTable" style="width:100%;"><tr>
+                      <th style="width:70%;text-align:left"><h5 class="mt-0"> <?php echo $products[$k]["name"]; ?></h5></th>
+                        <input type="hidden" name="id" id="id_<?php echo $products[$k]["id"]; ?>" value="<?php echo $var['id_store_front']; ?>">
+                        <input type="hidden" name="product_id" id="product_id_<?php echo $products[$k]["id"]; ?>" value="<?php echo $products[$k]["id"]; ?>">
+                        <input type="hidden" name="product_name" id="product_name_<?php echo $products[$k]["id"]; ?>" value="<?php echo $products[$k]["name"]; ?>">
+                        <td style="width:30%;text-align:right">
+                         <div class="quantity">
+                          <button class="minus-btn" type="button" name="button">-</button>
+                          <input type="text" name="quantity" id="quantity_<?php echo $products[$k]["id"]; ?>" value="1">
+                          <button class="plus-btn" type="button" name="button">+</button>
+                         </div>
+                        </td></tr>
+                       <tr><th style="text-align:left"><h6 class="text-primary menu-price"><?php echo "&#8377;".$products[$k]["price"]; ?></h6></th>
+                        <input type="hidden" name="price" id="price_<?php echo $products[$k]["id"]; ?>" value="<?php echo $products[$k]["price"]; ?>">
+                        <input type="hidden" name="amount" id="amount_<?php echo $products[$k]["id"]; ?>" value="<?php echo $products[$k]["price"]; ?>">
+    				           <td style="text-align:right"><input type="button" id="submit_<?php echo $products[$k]["id"]; ?>" class="btn btn-success" value="Add" data-value="<?php echo $products[$k]["id"]; ?>"></td></tr>
+                     </table>
+                    </div>
                   </div>
                 </div>
-              </div>
-  		      </div>	
-  		     </div>		 
-  		    </form>
-         <?php } 
-        endforeach ?>        
-      </div>  
-    </div>
-	</section>
-	<?php endforeach ?>
+    		      </div>	
+    		     </div>		 
+           <?php } ?>
+          <?php endforeach; ?>      
+        </div>
+  	  </section>
+      <?php endforeach; ?>
+    </form>	
 
 	<!-- FOOTER -->
 	<footer class="ftco-footer ftco-bg-dark ftco-section">
@@ -114,7 +117,51 @@
       </div>
   </footer>
 	<div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
+
 	<script type="text/javascript">
+    $(document).ready(function() {
+      var base_url = "<?php echo base_url(); ?>";
+      document.querySelectorAll("[id^='submit_']").on('click', function(e) {
+        alert($(this).data("value").val());
+        var id = $('#id_'+ $(this).data("value")).val();
+        var product_id = $('#product_id_'+ $(this).data("value")).val();
+        var product_name = $('#product_name_'+ $(this).data("value")).val();
+        var qty = $('#quantity_'+ $(this).data("value")).val();
+        var price = $('#price_'+ $(this).data("value")).val();
+        var amount = qty * price;
+
+        $.ajax({
+            url: base_url + 'cart/updatecart',
+            type: 'post',
+            dataType: 'json',
+            data: { cust_id:id, product_id:product_id, product_name:product_name, qty:qty, rate:price, amount:amount },
+            success: function(data)
+            {
+                console.log('success',data);
+            }
+        })
+      });
+
+      /*function cart(id){
+        var user_id=document.getElementById("id_"+id).value;
+        var product_id=document.getElementsById("product_id_"+id).value;
+        var product_name=document.getElementById("product_name_"+id).value;
+        var qty=document.getElementById("quantity"+id).value;
+        var price=document.getElementById("price_"+id).value;
+        var amount=price * qty;
+
+        $.ajax({
+          url: 'localhost/store-front/cart/updatecart',
+          type: 'post',
+          dataType: 'json',
+          data: { cust_id:user_id, product_id:product_id, product_name:product_name, qty:qty, rate:price, amount:amount },
+          success: function(data)
+          {
+              console.log('success',data);
+          }
+        })
+      }*/
+
       $('.minus-btn').on('click', function(e) {
     		e.preventDefault();
     		var $this = $(this);
@@ -127,6 +174,7 @@
     		}
         $input.val(value);
     	});
+
     	$('.plus-btn').on('click', function(e) {
     		e.preventDefault();
     		var $this = $(this);
@@ -139,6 +187,7 @@
     		}
     		$input.val(value);
     	});
+    });
   </script>
   <script src="assets/js/main.js"></script> <!-- Resource jQuery -->
   <script src="assets/js/jquery.min.js"></script>
