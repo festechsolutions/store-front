@@ -19,6 +19,35 @@ class Cart extends Admin_Controller {
         $this->load->view('cart',$data);
 	}
 
+	public function getcartcount()
+	{
+		$cust_id = $this->input->post('cust_id');
+
+		$get_count = $this->model_cart->getCartCount($cust_id);
+
+		echo $get_count;
+		return $get_count;
+	}
+
+	public function getCartProducts()
+	{
+		$cust_id = $this->input->post('cust_id');
+
+		$cart_products = $this->model_cart->getActiveCartData($cust_id);
+
+        echo json_encode($cart_products);
+	}
+
+	public function removecart()
+	{
+		$cust_id = $this->input->post('cust_id');
+		$product_id = $this->input->post('product_id');
+
+		$remove = $this->model_cart->remove($cust_id,$product_id);
+
+		return $remove;
+	}
+
 	public function updatecart()
 	{
 		$response = array();
@@ -31,6 +60,7 @@ class Cart extends Admin_Controller {
 		$this->form_validation->set_rules('amount', 'Amount', 'trim|required');
 
         if ($this->form_validation->run() == TRUE) {
+
         	$data = array(
         		'cust_id' => $this->input->post('cust_id'),
         		'product_id' => $this->input->post('product_id'),
@@ -40,17 +70,47 @@ class Cart extends Admin_Controller {
         		'amount' => $this->input->post('amount'),	
         	);
 
-        	$create = $this->model_cart->insert($data);
+        	if($data['qty'] != 0){
 
-        	if($create == true) {
-        		echo "Product added";
-        		$response['success'] = true;
-        		$response['messages'] = 'Product added to cart';
+        		$check_product = $this->model_cart->checkIfProductExistInCart($data['cust_id'],$data['product_id']);
+
+	        	if($check_product == false) {
+
+		        	$create = $this->model_cart->insert($data);
+
+		        	if($create == true) {
+		        		echo "Product added to cart";
+		        		$response['success'] = true;
+		        		$response['messages'] = 'Product added to cart';
+		        	}
+		        	else {
+		        		echo "Failed to add to cart";
+		        		$response['success'] = false;
+		        		$response['messages'] = 'Error in the database while adding to cart';			
+		        	}
+		        }
+		        else {
+
+		        	$update = $this->model_cart->update($data['cust_id'],$data['product_id'],$data['qty'],$data['rate'],$data['amount']);
+
+		        	if($update == true) {
+		        		echo "Product added to cart";
+		        		$response['success'] = true;
+		        		$response['messages'] = 'Product added to cart';
+		        	}
+		        	else {
+		        		echo "Failed to add to cart";
+		        		$response['success'] = false;
+		        		$response['messages'] = 'Error in the database while adding to cart';			
+		        	}
+		        }
         	}
-        	else {
-        		$response['success'] = false;
-        		$response['messages'] = 'Error in the database while adding to cart';			
+        	else{
+        		echo "Product quantity cannot be zero";
+		        $response['success'] = false;
+		        $response['messages'] = 'Please increment the product quantity';
         	}
+
 		}
 	}
 }

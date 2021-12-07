@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
     <link href="https://fonts.googleapis.com/css?family=Muli:700" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/open-iconic-bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/animate.css">
@@ -26,7 +27,7 @@
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="oi oi-menu"></span>&nbsp;Menu
         </button>
-        <a href="cart" title="Cart"> <img src="./assets/images/cart_1.png"> (0)</a>
+        <a href="cart" title="Cart"> <img src="./assets/images/cart_1.png">(<span id="cart-count"></span>)</a>
         <div class="collapse navbar-collapse" id="ftco-nav">
           <ul class="navbar-nav ml-auto">
 		        <?php foreach ($categories as $key => $value):
@@ -79,20 +80,21 @@
                     <div class="media-body">
                      <table id="menuTable" style="width:100%;"><tr>
                       <th style="width:70%;text-align:left"><h5 class="mt-0"> <?php echo $products[$k]["name"]; ?></h5></th>
+                      <input type="hidden" name="id" id="id" value="<?php echo $var['id_store_front']; ?>">
                         <input type="hidden" name="id" id="id_<?php echo $products[$k]["id"]; ?>" value="<?php echo $var['id_store_front']; ?>">
                         <input type="hidden" name="product_id" id="product_id_<?php echo $products[$k]["id"]; ?>" value="<?php echo $products[$k]["id"]; ?>">
                         <input type="hidden" name="product_name" id="product_name_<?php echo $products[$k]["id"]; ?>" value="<?php echo $products[$k]["name"]; ?>">
                         <td style="width:30%;text-align:right">
                          <div class="quantity">
                           <button class="minus-btn" type="button" name="button">-</button>
-                          <input type="text" name="quantity" id="quantity_<?php echo $products[$k]["id"]; ?>" value="1">
+                          <input type="text" name="quantity" id="quantity_<?php echo $products[$k]["id"]; ?>" value="0">
                           <button class="plus-btn" type="button" name="button">+</button>
                          </div>
                         </td></tr>
                        <tr><th style="text-align:left"><h6 class="text-primary menu-price"><?php echo "&#8377;".$products[$k]["price"]; ?></h6></th>
                         <input type="hidden" name="price" id="price_<?php echo $products[$k]["id"]; ?>" value="<?php echo $products[$k]["price"]; ?>">
                         <input type="hidden" name="amount" id="amount_<?php echo $products[$k]["id"]; ?>" value="<?php echo $products[$k]["price"]; ?>">
-    				           <td style="text-align:right"><input type="button" id="submit_<?php echo $products[$k]["id"]; ?>" class="btn btn-success" value="Add" data-value="<?php echo $products[$k]["id"]; ?>"></td></tr>
+    				           <td style="text-align:right;white-space:nowrap;"><span id="remove_<?php echo $products[$k]["id"]; ?>" data-value="<?php echo $products[$k]["id"]; ?>" class="fa fa-trash-o" style="font-size:24px;color:red;visibility: hidden;"></span>&nbsp;&nbsp;<input type="button" id="submit" class="btn btn-success" value="Add" data-value="<?php echo $products[$k]["id"]; ?>"></td></tr>
                      </table>
                     </div>
                   </div>
@@ -120,9 +122,28 @@
 
 	<script type="text/javascript">
     $(document).ready(function() {
+      
       var base_url = "<?php echo base_url(); ?>";
-      document.querySelectorAll("[id^='submit_']").on('click', function(e) {
-        alert($(this).data("value").val());
+      var user_id = $('#id').val();
+
+      $.ajax({
+        url: base_url + 'cart/getCartProducts',
+        type: 'post',
+        dataType: 'json',
+        data: { cust_id: user_id },
+        success: function(data)
+        {
+            console.log('success',data);
+            $("#cart-count").html('<label>'+ data.count +'</label>');
+            for ( i = 0; i < data.count; i++) {
+              $("#quantity_" +data.products[i].product_id).val(data.products[i].qty);
+              document.getElementById("remove_" +data.products[i].product_id).style.visibility = "visible";
+            }
+        }
+      })
+
+      $(document).on('click', "#submit", function(e) {
+
         var id = $('#id_'+ $(this).data("value")).val();
         var product_id = $('#product_id_'+ $(this).data("value")).val();
         var product_name = $('#product_name_'+ $(this).data("value")).val();
@@ -140,27 +161,61 @@
                 console.log('success',data);
             }
         })
-      });
 
-      /*function cart(id){
-        var user_id=document.getElementById("id_"+id).value;
-        var product_id=document.getElementsById("product_id_"+id).value;
-        var product_name=document.getElementById("product_name_"+id).value;
-        var qty=document.getElementById("quantity"+id).value;
-        var price=document.getElementById("price_"+id).value;
-        var amount=price * qty;
+        if(qty == 0){
+          alert("Product quantity cannot be zero");
+        }
+        else{
+          alert("Product updated to cart");
+        }
 
         $.ajax({
-          url: 'localhost/store-front/cart/updatecart',
+          url: base_url + 'cart/getcartcount',
           type: 'post',
           dataType: 'json',
-          data: { cust_id:user_id, product_id:product_id, product_name:product_name, qty:qty, rate:price, amount:amount },
+          data: { cust_id: id },
           success: function(data)
           {
               console.log('success',data);
+              $("#cart-count").html(data);
+              $("#remove_" +product_id).css('visibility', 'visible');
           }
         })
-      }*/
+      });
+
+      $(document).on('click', '[id*="remove_"]', function(e) {
+
+        var id = $('#id_'+ $(this).data("value")).val();
+        var product_id = $('#product_id_'+ $(this).data("value")).val();
+
+        $.ajax({
+            url: base_url + 'cart/removecart',
+            type: 'post',
+            dataType: 'json',
+            data: { cust_id:id, product_id:product_id },
+            success: function(data)
+            {
+                console.log('success',data);
+            }
+        })
+
+        alert("Product removed from cart");
+
+        $.ajax({
+          url: base_url + 'cart/getcartcount',
+          type: 'post',
+          dataType: 'json',
+          data: { cust_id: id },
+          success: function(data)
+          {
+              console.log('success',data);
+              $("#cart-count").html(data);
+              $("#quantity_" +product_id).val(0);
+              $("#remove_" +product_id).css('visibility', 'hidden');
+          }
+        })
+      });
+
 
       $('.minus-btn').on('click', function(e) {
     		e.preventDefault();
